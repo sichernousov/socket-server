@@ -5,11 +5,14 @@
 #include <netinet/in.h>
 #include <unistd.h>
 
+#define BUF_LEN 128
+
 int main()
 {
     int sock, listener;
     struct sockaddr_in addr;
     char buf[1024];
+    char out_buf[BUF_LEN];
     int bytes_read;
 
     listener = socket(AF_INET, SOCK_STREAM, 0);
@@ -47,23 +50,27 @@ int main()
             
         case 0:
             close(listener);
+
             seq_t * s1 = create_seq();
             seq_t * s2 = create_seq();
             seq_t * s3 = create_seq();
             set_param_seq(s1, 1, 1);
             set_param_seq(s2, 2, 2);
             set_param_seq(s3, 3, 3);
+            memset(out_buf, '\0', BUF_LEN);
+
             while(1)
             {
                 bytes_read = recv(sock, buf, 1024, 0);
                 if(bytes_read <= 0) break;
-                generate_one(buf, s1, s2, s3, 0);
-                send(sock, buf, strlen(buf), 0);
-                generate_one(buf, s1, s2, s3, 1);
-                send(sock, buf, strlen(buf), 0);
-                generate_one(buf, s1, s2, s3, 2);
-                send(sock, buf, strlen(buf), 0);
+
+                generate_seq(out_buf, 128, s1, s2, s3);
+                send(sock, out_buf, strlen(out_buf), 0);
             }
+
+            delete_seq(s1);
+            delete_seq(s2);
+            delete_seq(s3);
 
             close(sock);
             _exit(0);

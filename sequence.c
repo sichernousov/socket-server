@@ -1,7 +1,25 @@
 #include "sequence.h"
 
+/* PRIVATE FUNCS */
 static void calc_valid (seq_t * ps) {
     ps->valid = (ps->step && ps->base) ? TRUE : FALSE;
+}
+
+static void add_seq_elem (char * pbuf, uint32_t * len, uint32_t maxlen, seq_t * ps, uint32_t itr)
+{
+    if ((ps->valid) && (*len < maxlen))
+    {
+        uint64_t seq_elem = ps->base + (ps->step * itr);
+        char tmp_buf[20];
+        memset(tmp_buf, '\0', 20);
+        sprintf(tmp_buf, "%" PRIu64, seq_elem);
+        *len += strlen(tmp_buf);
+        if (*len < maxlen)
+        {
+          pbuf = strcat (pbuf, tmp_buf);
+          pbuf = strcat (pbuf, " ");
+        }
+    }
 }
 
 /* PUBLIC FUNCS */
@@ -32,39 +50,19 @@ void set_param_seq (seq_t * ps, uint64_t base, uint64_t step)
     calc_valid(ps);
 }
 
-uint8_t generate_one (char * pbuf, seq_t * ps1, seq_t * ps2, seq_t * ps3, uint32_t itr)
+
+uint8_t generate_seq (char * pbuf, uint32_t maxlen, seq_t * ps1, seq_t * ps2, seq_t * ps3)
 {
     if (!(ps1->valid || ps2->valid || ps3->valid))
         return 1; //error
 
-    if (ps1->valid)
-    {
-      uint64_t seq_elem = ps1->base + (ps1->step * itr);
-      char tmp_buf[20];
-      memset(tmp_buf, '\0', 20);
-      sprintf(tmp_buf, "%" PRIu64, seq_elem);
-      pbuf = strcat (pbuf, tmp_buf);
-      pbuf = strcat (pbuf, " ");
-    }
-
-    if (ps2->valid)
-    {
-      uint64_t seq_elem = ps2->base + (ps2->step * itr);
-      char tmp_buf[20];
-      memset(tmp_buf, '\0', 20);
-      sprintf(tmp_buf, "%" PRIu64, seq_elem);
-      pbuf = strcat (pbuf, tmp_buf);
-      pbuf = strcat (pbuf, " ");
-    }
-
-    if (ps3->valid)
-    {
-      uint64_t seq_elem = ps3->base + (ps3->step * itr);
-      char tmp_buf[20];
-      memset(tmp_buf, '\0', 20);
-      sprintf(tmp_buf, "%" PRIu64, seq_elem);
-      pbuf = strcat (pbuf, tmp_buf);
-      pbuf = strcat (pbuf, " ");
+    uint32_t len = 0;
+    uint32_t itr = 0;
+    while (len < maxlen) {
+        add_seq_elem(pbuf, &len, maxlen, ps1, itr);
+        add_seq_elem(pbuf, &len, maxlen, ps2, itr);
+        add_seq_elem(pbuf, &len, maxlen, ps3, itr);
+        itr++;
     }
 
     return 0;

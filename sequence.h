@@ -18,6 +18,6 @@ typedef struct {
 seq_t * create_seq (void);
 void delete_seq (seq_t * ps);
 void set_param_seq (seq_t * ps, uint64_t base, uint64_t step);
-uint8_t generate_one (char * pbuf, seq_t * ps1, seq_t * ps2, seq_t * ps3, uint32_t itr);
+uint8_t generate_seq (char * pbuf, uint32_t maxlen, seq_t * ps1, seq_t * ps2, seq_t * ps3);
 
 #endif
