@@ -5,7 +5,7 @@ static void calc_valid (seq_t * ps) {
     ps->valid = (ps->step && ps->base) ? TRUE : FALSE;
 }
 
-static void add_seq_elem (char * pbuf, uint32_t * len, uint32_t maxlen, seq_t * ps, uint32_t itr)
+static void add_seq_elem_to_buf (seq_t * ps, char * pbuf, uint32_t * len, uint32_t maxlen, uint32_t itr)
 {
     if ((ps->valid) && (*len < maxlen))
     {
@@ -59,9 +59,9 @@ uint8_t generate_seq (char * pbuf, uint32_t maxlen, seq_t * ps1, seq_t * ps2, se
     uint32_t len = 0;
     uint32_t itr = 0;
     while (len < maxlen) {
-        add_seq_elem(pbuf, &len, maxlen, ps1, itr);
-        add_seq_elem(pbuf, &len, maxlen, ps2, itr);
-        add_seq_elem(pbuf, &len, maxlen, ps3, itr);
+        add_seq_elem_to_buf(ps1, pbuf, &len, maxlen, itr);
+        add_seq_elem_to_buf(ps2, pbuf, &len, maxlen, itr);
+        add_seq_elem_to_buf(ps3, pbuf, &len, maxlen, itr);
         itr++;
     }
 

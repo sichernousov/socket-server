@@ -7,6 +7,8 @@
 
 #define BUF_LEN 128
 
+const char err_msg[] = "Error. All sequences are empty\n";
+
 int main()
 {
     int sock, listener;
@@ -44,42 +46,45 @@ int main()
         
         switch(fork())
         {
-        case -1:
-            perror("fork");
+            case -1:
+                perror("fork");
             break;
             
-        case 0:
-            close(listener);
+            case 0:
+                close(listener);
 
-            seq_t * s1 = create_seq();
-            seq_t * s2 = create_seq();
-            seq_t * s3 = create_seq();
-            set_param_seq(s1, 1, 1);
-            set_param_seq(s2, 2, 2);
-            set_param_seq(s3, 3, 3);
-            memset(out_buf, '\0', BUF_LEN);
+                seq_t * s1 = create_seq();
+                seq_t * s2 = create_seq();
+                seq_t * s3 = create_seq();
+                set_param_seq(s1, 1, 1);
+                set_param_seq(s2, 2, 2);
+                set_param_seq(s3, 3, 3);
+                memset(out_buf, '\0', BUF_LEN);
+                do
+                {
+                    bytes_read = recv(sock, buf, 1024, 0);
+                    if(bytes_read > 0)
+                    {
+                        //ToDo
+                        if (generate_seq(out_buf, 128, s1, s2, s3) == 0)
+                          send(sock, out_buf, strlen(out_buf), 0);
+                        else
+                          send(sock, err_msg, strlen(err_msg), 0);
+                    }
+                }while (bytes_read > 0);
 
-            while(1)
-            {
-                bytes_read = recv(sock, buf, 1024, 0);
-                if(bytes_read <= 0) break;
+                delete_seq(s1);
+                delete_seq(s2);
+                delete_seq(s3);
 
-                generate_seq(out_buf, 128, s1, s2, s3);
-                send(sock, out_buf, strlen(out_buf), 0);
-            }
+                close(sock);
+                _exit(0);
+            break;
 
-            delete_seq(s1);
-            delete_seq(s2);
-            delete_seq(s3);
-
-            close(sock);
-            _exit(0);
-            
-        default:
-            close(sock);
+            default:
+                close(sock);
         }
-    }
-    
+    }   
     close(listener);
 
     return 0;
